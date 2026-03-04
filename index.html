@@ -3,298 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hangi Şebnem Ferah Fanısın?</title>
+    <title>Şebnem Ferah Fan Testi</title>
     <style>
-        :root {
-            --primary-dark: #0f0c29;
-            --mid-purple: #302b63;
-            --accent-pink: #ff0055;
-            --text-white: #ffffff;
+        /* Pastel & Modern Rock Teması */
+        :root { 
+            --bg: #1a1a2e; 
+            --card-bg: #2d2d44;
+            --accent: #ff85a1; /* Pastel pembe */
+            --text: #f0f0f0;
+            --pastel-purple: #9d81ba;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { 
+            background: var(--bg); 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: var(--text); 
+            overflow: hidden; 
         }
 
-        body {
-            background: linear-gradient(135deg, var(--primary-dark), var(--mid-purple), #24243e);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-white);
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        /* Container */
-        #app {
-            width: 100%;
-            max-width: 400px;
-            height: 600px;
+        #app { 
+            width: 100%; 
+            max-width: 400px; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
             position: relative;
-            display: flex;
-            flex-direction: column;
+        }
+
+        .screen { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
             justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        /* Screens */
-        .screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            width: 100%;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        .screen.active {
-            display: flex;
-        }
-
-        /* Start Screen */
-        h1 { font-size: 2rem; margin-bottom: 10px; text-shadow: 0 0 10px var(--accent-pink); }
-        p { opacity: 0.8; margin-bottom: 30px; }
-
-        .btn {
-            background: var(--accent-pink);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
-            transition: transform 0.2s;
-        }
-
-        .btn:active { transform: scale(0.95); }
-
-        /* Card Stack */
-        #card-container {
-            position: relative;
-            width: 100%;
-            height: 450px;
-            perspective: 1000px;
-        }
-
-        .card {
-            position: absolute;
             width: 100%;
             height: 100%;
-            background: #1a1a1a;
-            border-radius: 20px;
-            border: 2px solid rgba(255,255,255,0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease, opacity 0.3s;
-            cursor: grab;
-            overflow: hidden;
-            user-select: none;
+            animation: fadeIn 0.6s ease;
         }
 
-        .card-bg {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover;
-            background-position: center;
-            opacity: 0.4;
+        .active { display: flex; }
+
+        /* Kart Konteynırı */
+        #card-container { 
+            position: relative; 
+            width: 320px; 
+            height: 450px; 
+            margin-bottom: 30px;
+        }
+
+        .card { 
+            position: absolute; 
+            top: 0; left: 0;
+            width: 100%; height: 100%; 
+            background: var(--card-bg); 
+            border-radius: 25px; 
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-end; 
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-img { 
+            position: absolute; 
+            top:0; left:0; 
+            width:100%; height:100%; 
+            object-fit: cover; 
+            opacity: 0.7; 
             z-index: 1;
         }
 
-        .card-content {
-            position: relative;
-            z-index: 2;
+        .card-content { 
+            z-index: 2; 
+            text-align: left; 
             pointer-events: none;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            margin: -25px;
+            padding: 25px;
         }
 
-        .card h2 { font-size: 1.8rem; margin-bottom: 5px; }
-        .card i { font-style: italic; opacity: 0.9; display: block; margin-bottom: 20px;}
+        .card h2 { font-size: 1.6rem; color: var(--accent); margin-bottom: 5px; }
 
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 20px;
-            margin-top: 25px;
-            z-index: 10;
+        /* Butonlar */
+        .btn { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            padding: 15px 40px; 
+            border-radius: 30px; 
+            font-weight: bold;
+            cursor: pointer; 
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 133, 161, 0.4);
         }
 
-        .btn-round {
-            width: 60px;
-            height: 60px;
+        .btn:hover { transform: scale(1.05); background: var(--pastel-purple); }
+
+        .controls { display: flex; gap: 30px; z-index: 10; }
+
+        .btn-round { 
+            width: 65px; height: 65px; 
+            border-radius: 50%; border: none; 
+            font-size: 24px; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+
+        .btn-round:active { transform: scale(0.9); }
+
+        /* Sonuç Ekranı */
+        .result-img-container {
+            width: 200px; height: 200px;
             border-radius: 50%;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 5px solid var(--accent);
+            padding: 5px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            overflow: hidden;
         }
 
-        .btn-pass { background: #444; }
-        .btn-like { background: var(--accent-pink); }
-
-        /* Result Screen */
-        .result-img {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: #333;
-            margin: 20px 0;
-            border: 5px solid var(--accent-pink);
-            object-fit: cover;
+        .result-img { 
+            width: 100%; height: 100%; 
+            border-radius: 50%; 
+            object-fit: cover; 
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Swipe Classes */
-        .swiped-left { transform: translateX(-1000px) rotate(-30deg) !important; opacity: 0; }
-        .swiped-right { transform: translateX(1000px) rotate(30deg) !important; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .swipe-left { transform: translateX(-600px) rotate(-40deg) !important; opacity: 0; }
+        .swipe-right { transform: translateX(600px) rotate(40deg) !important; opacity: 0; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="start-screen" class="screen active">
-        <h1>Hangi Şebnem Ferah Fanısın?</h1>
-        <p>Kaydır ve öğren</p>
-        <button class="btn" onclick="startQuiz()">Teste Başla</button>
+    <div id="s-start" class="screen active">
+        <h1 style="margin-bottom: 20px; color: var(--accent); text-align: center;">Nasıl Bir Şebnem Ferah Fanısın?</h1>
+        <p style="margin-bottom: 30px; opacity: 0.8; text-align: center;">Gerçek rock ruhunu keşfetme zamanı.</p>
+        <button class="btn" onclick="start()">Teste Başla</button>
     </div>
 
-    <div id="quiz-screen" class="screen">
+    <div id="s-quiz" class="screen">
         <div id="card-container"></div>
         <div class="controls">
-            <button class="btn-round btn-pass" onclick="handleSwipe('left')">⛔</button>
-            <button class="btn-round btn-like" onclick="handleSwipe('right')">❤️</button>
+            <button class="btn-round" style="background:#555" onclick="swipe('left')">⛔</button>
+            <button class="btn-round" style="background:var(--accent)" onclick="swipe('right')">❤️</button>
         </div>
     </div>
 
-    <div id="result-screen" class="screen">
-        <h1>Sonuç: En Güzel Şebnem Ferah Fanı</h1>
-        <img src="https://via.placeholder.com/200" alt="special person" class="result-img">
-        <p style="font-size: 1.2rem; font-weight: bold;">Gerçek rock ruhu sensin.</p>
-        <button class="btn" onclick="location.reload()">Tekrar Oyna</button>
+    <div id="s-result" class="screen">
+        <h2 style="color: var(--accent); margin-bottom: 10px;">Sonuç: En Güzel Şebnem Ferah Fanı</h2>
+        <div class="result-img-container">
+            <img src="eda.jpeg" class="result-img" id="final-img" onerror="this.src='https://via.placeholder.com/200?text=Eda'">
+        </div>
+        <p style="font-size: 1.2rem; margin-bottom: 25px;">Gerçek rock ruhu sensin.</p>
+        <button class="btn" onclick="location.reload()">Tekrarla</button>
     </div>
 </div>
 
 <script>
-    const songs = [
-        { title: "Sil Baştan", lyric: "Gücün var mı hiç baştan başlamaya?", color: "#4b0082", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-        { title: "Can Kırıkları", lyric: "Kalbim can kırıklarıyla dolu...", color: "#2e0854", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-        { title: "Yalnız", lyric: "Yalnız kaldım dünyada...", color: "#1a0033", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-        { title: "Ben Bir Mülteciyim", lyric: "Sana sığındım her gece...", color: "#483d8b", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-        { title: "Bu Aşk Fazla Sana", lyric: "Gidiyorum bütün aşklar yüreğimde.", color: "#800080", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
-        { title: "Fırtına", lyric: "Koptu içimde sessiz bir fırtına.", color: "#4b0082", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
-        { title: "Hoşçakal", lyric: "Gidiyorum, hoşçakal...", color: "#191970", audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" }
+    // Dosya isimleri s1, s2... ve 1.jfif, 2.jpg... olarak güncellendi
+    const data = [
+        { t: "Sil Baştan", s: "s1.mp3", i: "1.jfif" },
+        { t: "Can Kırıkları", s: "s2.mp3", i: "2.jpg" },
+        { t: "Hoşçakal", s: "s3.mp3", i: "3.jpg" },
+        { t: "Mayın Tarlası", s: "s4.mp3", i: "4.jpg" },
+        { t: "Sigara", s: "s5.mp3", i: "5.jpg" },
+        { t: "Utangaç", s: "s6.mp3", i: "6.png" }
     ];
 
-    let currentIndex = 0;
-    let currentAudio = new Audio();
-    const container = document.getElementById('card-container');
+    let idx = 0;
+    let audio = new Audio();
 
-    function startQuiz() {
-        document.getElementById('start-screen').classList.remove('active');
-        document.getElementById('quiz-screen').classList.add('active');
-        loadCards();
-        playSong(0);
+    function start() {
+        document.getElementById('s-start').classList.remove('active');
+        document.getElementById('s-quiz').classList.add('active');
+        render();
+        play(0);
     }
 
-    function loadCards() {
-        songs.forEach((song, index) => {
+    function render() {
+        const cont = document.getElementById('card-container');
+        cont.innerHTML = '';
+        data.forEach((item, i) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.style.zIndex = songs.length - index;
+            card.style.zIndex = data.length - i;
+            card.id = 'c-' + i;
             card.innerHTML = `
-                <div class="card-bg" style="background-color: ${song.color}"></div>
-                <div class="card-content">
-                    <h2>${song.title}</h2>
-                    <i>"${song.lyric}"</i>
-                </div>
+                <img src="${item.i}" class="card-img" onerror="this.src='https://via.placeholder.com/320x450/2d2d44/ff85a1?text=${item.t}'">
+                <div class="card-content"><h2>${item.t}</h2></div>
             `;
-            setupSwipe(card);
-            container.appendChild(card);
+            cont.appendChild(card);
         });
     }
 
-    function playSong(index) {
-        currentAudio.pause();
-        if (index < songs.length) {
-            currentAudio.src = songs[index].audio;
-            currentAudio.play().catch(e => console.log("Audio play blocked by browser. Interaction required."));
+    function play(n) {
+        audio.pause();
+        // n=99 sonucu (eda.mp3) çalar
+        if(n === 99 || n >= data.length) {
+            audio.src = "seda.mp3";
+        } else {
+            audio.src = data[n].s;
         }
+        audio.play().catch(e => console.log("Dosya bulunamadı veya oynatma engellendi."));
     }
 
-    function handleSwipe(direction) {
-        const cards = document.querySelectorAll('.card');
-        const topCard = cards[currentIndex];
-        
-        if (topCard) {
-            topCard.classList.add(direction === 'left' ? 'swiped-left' : 'swiped-right');
-            currentIndex++;
+    function swipe(dir) {
+        const currentCard = document.getElementById('c-' + idx);
+        if (currentCard) {
+            currentCard.classList.add(dir === 'left' ? 'swipe-left' : 'swipe-right');
+            idx++;
             
-            if (currentIndex < songs.length) {
-                playSong(currentIndex);
+            if (idx < data.length) {
+                play(idx);
             } else {
-                currentAudio.pause();
-                setTimeout(showResult, 500);
+                setTimeout(showResult, 400);
             }
         }
     }
 
     function showResult() {
-        document.getElementById('quiz-screen').classList.remove('active');
-        document.getElementById('result-screen').classList.add('active');
-    }
-
-    // Touch/Mouse Swipe Implementation
-    function setupSwipe(card) {
-        let startX = 0;
-        let currentX = 0;
-
-        const start = (e) => {
-            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            card.style.transition = 'none';
-        };
-
-        const move = (e) => {
-            if (!startX) return;
-            currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            const diff = currentX - startX;
-            const rotation = diff / 10;
-            card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
-        };
-
-        const end = () => {
-            const diff = currentX - startX;
-            card.style.transition = 'transform 0.3s ease, opacity 0.3s';
-            
-            if (Math.abs(diff) > 100) {
-                handleSwipe(diff > 0 ? 'right' : 'left');
-            } else {
-                card.style.transform = '';
-            }
-            startX = 0;
-            currentX = 0;
-        };
-
-        card.addEventListener('mousedown', start);
-        card.addEventListener('touchstart', start);
-        window.addEventListener('mousemove', move);
-        window.addEventListener('touchmove', move);
-        window.addEventListener('mouseup', end);
-        window.addEventListener('touchend', end);
+        document.getElementById('s-quiz').classList.remove('active');
+        document.getElementById('s-result').classList.add('active');
+        play(99); 
     }
 </script>
-
 </body>
 </html>
