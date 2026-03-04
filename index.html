@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şebnem Ferah Fan Testi (Müzikli)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --red: #b30000; --dark: #0a0a0a; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: var(--dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Arka Plan Görseli */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1920') center/cover;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        h1 { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; text-shadow: 0 0 10px var(--red); }
+        .score-box { margin-bottom: 20px; font-size: 0.9rem; color: #aaa; }
+
+        .game-container { position: relative; width: 320px; height: 450px; }
+
+        .card {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: #1a1a1a;
+            border: 2px solid var(--red);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            cursor: grab;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; pointer-events: none; }
+        .card h2 { font-family: 'Oswald'; font-size: 1.5rem; margin: 0; }
+
+        .controls { margin-top: 30px; display: flex; gap: 20px; }
+        button {
+            padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer;
+            font-family: 'Oswald'; text-transform: uppercase; transition: 0.3s;
+        }
+        .btn-l { background: #333; color: white; }
+        .btn-r { background: var(--red); color: white; }
+
+        #result {
+            display: none;
+            text-align: center;
+            background: rgba(0,0,0,0.9);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid var(--red);
+            max-width: 350px;
+            animation: zoomIn 0.5s;
+        }
+        #result img { width: 100%; border-radius: 10px; margin-bottom: 15px; }
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>Şebnem Ferah Fan Testi</h1>
+    <div class="score-box">Sıradaki Şarkı Çalıyor... 🤘</div>
+
+    <div class="game-container" id="stack"></div>
+
+    <div class="controls" id="controls">
+        <button class="btn-l" onclick="swipe('left')">Bilmiyorum</button>
+        <button class="btn-r" onclick="swipe('right')">Biliyorum</button>
+    </div>
+
+    <div id="result">
+        <img src="https://i.ibb.co/Xf8z19q/sebnem-ferah.jpg" alt="Şebnem Ferah"> <h2 id="percent-text"></h2>
+        <p id="final-msg"></p>
+        <button style="background: white; color: black;" onclick="location.reload()">Tekrar Dene</button>
+    </div>
+
+    <audio id="player"></audio>
+
+    <script>
+        const songs = [
+            { t: "Sil Baştan", mp3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400" },
+            { t: "Mayın Tarlası", mp3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", img: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400" },
+            { t: "Bu Aşk Fazla Sana", mp3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400" }
+            // Buraya şarkı mp3 linklerini ekleyebilirsin.
+        ];
+
+        let currentIdx = songs.length - 1;
+        let score = 0;
+        const stack = document.getElementById('stack');
+        const player = document.getElementById('player');
+
+        function init() {
+            songs.forEach((s, i) => {
+                const c = document.createElement('div');
+                c.className = 'card';
+                c.style.zIndex = i;
+                c.innerHTML = `<img src="${s.img}"><h2>${s.t}</h2>`;
+                stack.appendChild(c);
+            });
+            playMusic();
+        }
+
+        function playMusic() {
+            if(currentIdx >= 0) {
+                player.src = songs[currentIdx].mp3;
+                player.play().catch(e => console.log("Otomatik oynatma için etkileşim lazım."));
+            } else {
+                player.pause();
+            }
+        }
+
+        function swipe(dir) {
+            const cards = document.querySelectorAll('.card');
+            if(currentIdx < 0) return;
+
+            const card = cards[currentIdx];
+            if(dir === 'right') score++;
+            
+            card.style.transform = `translateX(${dir === 'right' ? 600 : -600}px) rotate(${dir==='right'?45:-45}deg)`;
+            card.style.opacity = '0';
+
+            currentIdx--;
+            setTimeout(playMusic, 300);
+
+            if(currentIdx < 0) {
+                setTimeout(showResult, 600);
+            }
+        }
+
+        function showResult() {
+            stack.style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+            const resultDiv = document.getElementById('result');
+            const perc = Math.round((score / songs.length) * 100);
+            
+            resultDiv.style.display = 'block';
+            document.getElementById('percent-text').innerText = `%${perc} Fan Çıktın!`;
+            document.getElementById('final-msg').innerHTML = `Ne kadar bildiğin önemli değil, <b>en güzeli görseldeki hanımefendi (ve sen!)</b> 🤘`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
