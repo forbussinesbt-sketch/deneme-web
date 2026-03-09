@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karakedi ve Yabancı</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background-color: #0b0b0b; 
+            color: #fff; 
+            font-family: 'Georgia', serif; 
+            overflow: hidden; 
+        }
+
+        /* GİRİŞ EKRANI */
+        #entry-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; z-index: 3000; transition: opacity 1s ease;
+        }
+
+        #password-input {
+            padding: 12px 20px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2); color: white;
+            border-radius: 25px; margin-bottom: 20px; text-align: center; outline: none;
+        }
+
+        #start-button {
+            padding: 12px 40px; background: transparent; border: 1px solid rgba(255,255,255,0.4);
+            color: white; cursor: pointer; border-radius: 25px; letter-spacing: 2px;
+        }
+
+        /* KAYDIRMALI HİKAYE YAPISI */
+        #main-container {
+            height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; 
+            scroll-behavior: smooth; display: none;
+        }
+
+        .story-page {
+            height: 100vh; width: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; scroll-snap-align: start; 
+            padding: 20px;
+        }
+
+        .image-box {
+            width: 100%; max-width: 450px; aspect-ratio: 1 / 1;
+            border-radius: 4px; overflow: hidden; opacity: 0.3;
+            transform: scale(0.95); transition: 1.5s ease;
+        }
+
+        .story-page.active .image-box { transform: scale(1); opacity: 1; }
+
+        .text-box { 
+            width: 100%; max-width: 450px; margin-top: 35px; 
+            text-align: center; font-style: italic; line-height: 1.8;
+            opacity: 0; transform: translateY(20px); transition: 1s ease 0.5s;
+        }
+
+        .story-page.active .text-box { opacity: 0.9; transform: translateY(0); }
+
+        /* --- SONDA ÇIKACAK KOPAN KAĞIT BÖLÜMÜ --- */
+        #final-notes-section {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a1a1a; display: none; /* Başta gizli */
+            justify-content: center; align-items: center; z-index: 4000;
+        }
+
+        .wall-text {
+            position: absolute; width: 100%; text-align: center;
+            color: rgba(255, 255, 255, 0.9); font-size: 1.6rem;
+            font-style: italic; text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+
+        .notes-container {
+            position: relative; width: 85%; max-width: 360px; height: 480px;
+            perspective: 1200px;
+        }
+
+        .sheet {
+            position: absolute; width: 100%; height: 100%; background: #e8dcc4;
+            background-image: radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                              url('https://www.transparenttextures.com/patterns/stardust.png');
+            clip-path: polygon(1% 1%, 98% 0%, 100% 4%, 99% 45%, 100% 90%, 96% 100%, 5% 99%, 0% 92%, 1% 50%, 0% 5%);
+            box-shadow: inset 0 0 40px rgba(101, 67, 33, 0.2), 0 10px 25px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            padding: 40px; transform-origin: top center; transition: transform 0.8s cubic-bezier(0.5, 0, 0.7, 1), opacity 0.5s;
+        }
+
+        .pin {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 16px; height: 16px; background: radial-gradient(circle at 30% 30%, #666, #111);
+            border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        }
+
+        .sheet-text { font-size: 1.1rem; color: #3d2b1f; line-height: 1.6; font-style: italic; }
+
+        .torn-off { transform: rotateX(-30deg) translateY(1000px) rotate(15deg) !important; opacity: 0; pointer-events: none; }
+        
+        #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #fff; width: 0%; z-index: 2500; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="progress-bar"></div>
+
+    <div id="entry-overlay">
+        <h2 style="margin-bottom: 20px; font-weight: 200; letter-spacing: 2px;">Kilitli Bir Anı</h2>
+        <input type="password" id="password-input" placeholder="Şifreyi giriniz...">
+        <button id="start-button" onclick="checkPassword()">HİKAYEYİ AÇ</button>
+        <p id="error-msg" style="color: #ff6b6b; margin-top: 15px; font-size: 0.8rem;"></p>
+    </div>
+
+    <div class="story-container" id="main-container">
+        <section class="story-page active">
+            <div class="image-box"><img src="https://images.unsplash.com/photo-1533230408708-8f9f91d12344?q=80&w=600&h=600&fit=crop"></div>
+            <div class="text-box"><p>Karakedi ormanda bir ışıltı fark etmiş. Kaynağa varınca bir kamp ateşi ve dalgın bir adam görmüş.</p></div>
+        </section>
+
+        <section class="story-page" id="story-end">
+            <div class="image-box"><img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=600&h=600&fit=crop"></div>
+            <div class="text-box">
+                <p>"İnsan her şeyini kaybedince bitti sanır ama bazen en acısı, hiç senin olmamış bir şeyi kaybetmektir."</p>
+                <button onclick="showFinalNotes()" style="margin-top: 20px; background: none; border: 1px solid #fff; color: #fff; padding: 10px 20px; cursor: pointer; border-radius: 20px;">Sona Git</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="final-notes-section">
+        <div class="wall-text">Özür dilerim prenses</div>
+        <div class="notes-container">
+            <div class="sheet" id="bgSheet" style="z-index: 1;">
+                <div class="pin"></div>
+                <p class="sheet-text" id="nextText">...</p>
+            </div>
+            <div class="sheet" id="activeSheet" style="z-index: 2; cursor: pointer;">
+                <div class="pin"></div>
+                <p class="sheet-text" id="activeText">Tıkla ve kopar...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('password-input');
+        const overlay = document.getElementById('entry-overlay');
+        const mainContainer = document.getElementById('main-container');
+        const progressBar = document.getElementById('progress-bar');
+        const finalSection = document.getElementById('final-notes-section');
+
+        const noteContents = [
+            "Biliyorum, kelimeler bazen çok yetersiz kalıyor.",
+            "Tıpkı o yabancı gibi, sana anlatmak istediklerimi hep mektuplara gizledim.",
+            "Yazmak, konuşmaktan daha güvenliydi sanki.",
+            "Ama bazen sessiz kalmak, en büyük çığlıkmış.",
+            "Son bir kez kopar bu sayfayı...",
+            "Veda değil, sadece bir son söz."
+        ];
+
+        let noteIndex = 0;
+
+        function checkPassword() {
+            if (passwordInput.value === 'veda') {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    mainContainer.style.display = 'block';
+                    progressBar.style.display = 'block';
+                    document.body.style.overflow = 'auto';
+                }, 1000);
+            } else {
+                document.getElementById('error-msg').innerText = "Hatalı şifre.";
+            }
+        }
+
+        function showFinalNotes() {
+            mainContainer.style.display = 'none';
+            progressBar.style.display = 'none';
+            finalSection.style.display = 'flex';
+            
+            document.getElementById('activeText').innerText = noteContents[0];
+            document.getElementById('nextText').innerText = noteContents[1];
+        }
+
+        const activeSheet = document.getElementById('activeSheet');
+        activeSheet.addEventListener('click', () => {
+            if (noteIndex >= noteContents.length - 1) return;
+
+            activeSheet.classList.add('torn-off');
+            setTimeout(() => {
+                noteIndex++;
+                if (noteIndex < noteContents.length - 1) {
+                    document.getElementById('activeText').innerText = noteContents[noteIndex];
+                    document.getElementById('nextText').innerText = noteContents[noteIndex + 1];
+                    activeSheet.style.transition = 'none';
+                    activeSheet.classList.remove('torn-off');
+                    setTimeout(() => {
+                        activeSheet.style.transition = 'transform 0.8s cubic-bezier(0.5, 0, 0.7, 1), opacity 0.5s';
+                    }, 50);
+                } else {
+                    activeSheet.style.display = 'none';
+                    document.getElementById('bgSheet').style.display = 'none';
+                }
+            }, 750);
+        });
+
+        // Kaydırma Takibi
+        mainContainer.addEventListener('scroll', () => {
+            const pages = document.querySelectorAll('.story-page');
+            const scrollTop = mainContainer.scrollTop;
+            const height = mainContainer.scrollHeight - mainContainer.clientHeight;
+            progressBar.style.width = (scrollTop / height) * 100 + "%";
+
+            pages.forEach(page => {
+                const rect = page.getBoundingClientRect();
+                if (rect.top >= -window.innerHeight / 2 && rect.top <= window.innerHeight / 2) {
+                    page.classList.add('active');
+                } else {
+                    page.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
