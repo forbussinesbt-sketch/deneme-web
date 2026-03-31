@@ -1,242 +1,615 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karakedi ve Yabancı</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            background-color: #0b0b0b; 
-            color: #fff; 
-            font-family: 'Georgia', serif; 
-            overflow: hidden; 
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Şebnem Ferah Fan Testi</title>
 
-        /* GİRİŞ EKRANI */
-        #entry-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; z-index: 5000; transition: opacity 1.2s ease;
-        }
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
-        #password-input {
-            padding: 12px 20px; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.2); color: white;
-            border-radius: 25px; margin-bottom: 20px; text-align: center; outline: none;
-        }
+  <style>
+    :root {
+      --bg: #fdfbf7;
+      --accent: #ff85a1;
+      --pastel-purple: #9d81ba;
+      --text: #2a2a2a;
+      --card-dark: #1a1a2e;
+      --card-dark2: #2d2d44;
+    }
 
-        #start-button {
-            padding: 12px 40px; background: transparent; border: 1px solid rgba(255,255,255,0.4);
-            color: white; cursor: pointer; border-radius: 25px; letter-spacing: 2px;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ANA KAYDIRMA KONTEYNERI */
-        .story-container { 
-            height: 100vh; 
-            overflow-y: scroll; 
-            scroll-snap-type: y mandatory; 
-            scroll-behavior: smooth;
-            display: none;
-        }
+    body {
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .story-page, .final-page {
-            height: 100vh; width: 100%; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; scroll-snap-align: start; 
-            padding: 20px; position: relative;
-        }
+    /* ─── SCREENS ─── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      padding: 20px;
+      animation: fadeUp 0.6s ease forwards;
+    }
 
-        /* Hikaye Görsel ve Metin Efektleri */
-        .image-box {
-            width: 100%; max-width: 450px; aspect-ratio: 1 / 1;
-            border-radius: 4px; overflow: hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.7);
-            transform: scale(0.95); transition: 1.5s ease; opacity: 0.3;
-        }
-        .story-page.active .image-box { transform: scale(1); opacity: 1; }
-        .image-box img { width: 100%; height: 100%; object-fit: cover; }
+    .screen.active { display: flex; }
 
-        .text-box { 
-            width: 100%; max-width: 450px; margin-top: 35px; 
-            text-align: center; font-style: italic; line-height: 1.8;
-            font-size: 1rem; opacity: 0; transform: translateY(20px);
-            transition: 1s ease 0.5s; color: #e0e0e0;
-        }
-        .story-page.active .text-box { opacity: 0.9; transform: translateY(0); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-        /* --- FINAL BÖLÜMÜ (KAYDIRMA İLE GELEN) --- */
-        .final-page { background: #1a1a1a; }
-        
-        .wall-text {
-            position: absolute; width: 100%; text-align: center; top: 15%;
-            color: rgba(255, 255, 255, 0.9); font-size: 1.6rem;
-            font-style: italic; text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
-        }
+    /* ─── START ─── */
+    #s-start { text-align: center; }
 
-        .notes-container {
-            position: relative; width: 85%; max-width: 360px; height: 420px;
-            perspective: 1200px; margin-top: 50px;
-        }
+    .start-note {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
 
-        .sheet {
-            position: absolute; width: 100%; height: 100%; background: #e8dcc4;
-            background-image: radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
-                              url('https://www.transparenttextures.com/patterns/stardust.png');
-            clip-path: polygon(1% 1%, 98% 0%, 100% 4%, 99% 45%, 100% 90%, 96% 100%, 5% 99%, 0% 92%, 1% 50%, 0% 5%);
-            box-shadow: inset 0 0 40px rgba(101, 67, 33, 0.2), 0 10px 25px rgba(0,0,0,0.5);
-            display: flex; justify-content: center; align-items: center; text-align: center;
-            padding: 40px; transform-origin: top center; transition: transform 0.8s cubic-bezier(0.5, 0, 0.7, 1), opacity 0.5s;
-        }
+    .start-sub {
+      font-size: 0.9rem;
+      color: #999;
+      font-weight: 300;
+      margin-bottom: 40px;
+    }
 
-        .pin {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            width: 16px; height: 16px; background: radial-gradient(circle at 30% 30%, #666, #111);
-            border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.6);
-        }
+    .vinyl-small {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--card-dark) 0deg, #3d1a55 60deg, var(--card-dark) 120deg,
+        #4a1a44 180deg, var(--card-dark) 240deg, #3a1a60 300deg, var(--card-dark) 360deg
+      );
+      margin: 0 auto 30px;
+      position: relative;
+      animation: spin 5s linear infinite;
+      box-shadow: 0 0 24px rgba(157,129,186,0.35);
+    }
 
-        .sheet-text { font-size: 1.1rem; color: #3d2b1f; line-height: 1.6; font-style: italic; user-select: none; }
-        .torn-off { transform: rotateX(-30deg) translateY(1000px) rotate(15deg) !important; opacity: 0; pointer-events: none; }
+    .vinyl-small::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
 
-        #progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #fff; width: 0%; z-index: 4000; transition: 0.3s; }
-    </style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── BUTTON ─── */
+    .btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid #ccc;
+      padding: 14px 40px;
+      border-radius: 40px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+      letter-spacing: 0.04em;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(255,133,161,0.06);
+    }
+
+    /* ─── QUIZ ─── */
+    #s-quiz { gap: 24px; }
+
+    .progress-wrap {
+      width: 100%;
+      max-width: 340px;
+      height: 2px;
+      background: #e8e4de;
+      border-radius: 2px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--pastel-purple));
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    /* ─── CARD STACK ─── */
+    #card-container {
+      position: relative;
+      width: min(340px, 88vw);
+      height: min(460px, 64vh);
+    }
+
+    .card {
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 28px;
+      cursor: grab;
+      user-select: none;
+      will-change: transform;
+      transition: transform 0.08s ease;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .card:active { cursor: grabbing; }
+
+    .card.back1 {
+      transform: scale(0.94) translateY(12px);
+      z-index: 1;
+      filter: brightness(0.75);
+    }
+
+    .card.back2 {
+      transform: scale(0.88) translateY(24px);
+      z-index: 0;
+      filter: brightness(0.55);
+    }
+
+    .card.active { z-index: 2; }
+
+    .card-img {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 30%,
+        rgba(10,6,22,0.55) 60%,
+        rgba(10,6,22,0.9) 100%
+      );
+      z-index: 1;
+    }
+
+    .card-content {
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .card-hint {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.45);
+      font-weight: 300;
+    }
+
+    /* ─── STAMPS ─── */
+    .stamp {
+      position: absolute;
+      top: 26px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: 3px solid;
+      border-radius: 6px;
+      padding: 4px 12px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+      transition: opacity 0.08s;
+    }
+
+    .stamp-yes {
+      right: 20px;
+      color: #6fcf97;
+      border-color: #6fcf97;
+      transform: rotate(12deg);
+    }
+
+    .stamp-no {
+      left: 20px;
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: rotate(-12deg);
+    }
+
+    /* ─── CONTROLS ─── */
+    .controls {
+      display: flex;
+      gap: 32px;
+    }
+
+    .btn-round {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      border: 1px solid #ddd;
+      background: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      transition: 0.2s;
+    }
+
+    .btn-round:hover { transform: scale(1.1); box-shadow: 0 6px 22px rgba(0,0,0,0.16); }
+    .btn-round:active { transform: scale(0.92); }
+
+    .q-counter {
+      font-size: 0.8rem;
+      color: #bbb;
+      font-weight: 300;
+    }
+
+    /* ─── FLY ANIMATIONS ─── */
+    .fly-left  { animation: flyLeft  0.42s cubic-bezier(.4,0,.6,1) forwards; }
+    .fly-right { animation: flyRight 0.42s cubic-bezier(.4,0,.6,1) forwards; }
+
+    @keyframes flyLeft  { to { transform: translateX(-140%) rotate(-28deg); opacity:0; } }
+    @keyframes flyRight { to { transform: translateX(140%)  rotate(28deg);  opacity:0; } }
+
+    /* ─── RESULT ─── */
+    #s-result, #s-result2 { text-align: center; gap: 18px; }
+
+    .result-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #bbb;
+      font-weight: 300;
+    }
+
+    .result-heading {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1.3rem, 4vw, 1.7rem);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .result-heading em {
+      color: var(--accent);
+      font-style: italic;
+      display: block;
+    }
+
+    .profile-ring {
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      padding: 4px;
+      background: linear-gradient(135deg, var(--accent), var(--pastel-purple));
+      margin: 0 auto;
+      box-shadow: 0 0 32px rgba(255,133,161,0.35);
+      animation: glow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%,100% { box-shadow: 0 0 24px rgba(255,133,161,0.3); }
+      50%      { box-shadow: 0 0 48px rgba(255,133,161,0.6), 0 0 80px rgba(157,129,186,0.25); }
+    }
+
+    .profile-ring img {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--bg);
+      display: block;
+    }
+
+    .profile-initials {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      border: 4px solid var(--bg);
+      background: linear-gradient(135deg, var(--card-dark2), #3d1a55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 2.8rem;
+      color: #fff;
+    }
+
+    .result-desc {
+      font-size: 0.92rem;
+      color: #888;
+      line-height: 1.7;
+      max-width: 280px;
+      margin: 0 auto;
+      font-weight: 300;
+    }
+
+    /* confetti */
+    .cf {
+      position: fixed;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      z-index: 999;
+      pointer-events: none;
+      animation: cfFall linear forwards;
+    }
+
+    @keyframes cfFall {
+      from { transform: translateY(-80px) rotate(0deg); opacity:1; }
+      to   { transform: translateY(110vh)  rotate(540deg); opacity:0; }
+    }
+  </style>
 </head>
 <body>
 
-    <div id="progress-bar"></div>
+<!-- EKRAN 1: GİRİŞ -->
+<div id="s-start" class="screen active">
+  <div class="vinyl-small"></div>
+  <p class="start-note">Nasıl Bir<br>Şebnem Ferah Fanısın?</p>
+  <p class="start-sub">"Öyle basit bir veda hislerime hakaret olurdu; bu yüzden sana küçük bir veda hediyesi bırakmak istedim."</p>
+  <button class="btn" onclick="start()">Teste Başla</button>
+</div>
 
-    <div id="entry-overlay">
-        <h2 style="margin-bottom: 25px; font-weight: 200; letter-spacing: 2px;">Küçük Bir Yolculuk</h2>
-        <input type="password" id="password-input" placeholder="Şifreyi giriniz...">
-        <button id="start-button" onclick="checkPassword()">BAŞLAT</button>
-        <p id="error-msg" style="color: #ff6b6b; margin-top: 15px; font-size: 0.8rem;"></p>
-    </div>
+<!-- EKRAN 2: TEST -->
+<div id="s-quiz" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
 
-    <div class="story-container" id="main-container">
-        
-        <section class="story-page active">
-            <div class="image-box"><img src="https://images.unsplash.com/photo-1533230408708-8f9f91d12344?q=80&w=600&h=600&fit=crop"></div>
-            <div class="text-box"><p>"Karakedi ormanda bir ışıltı fark etmiş. Kaynağa varınca bir kamp ateşi ve dalgın bir adam görmüş."</p></div>
-        </section>
+  <div id="card-container"></div>
 
-        <section class="story-page">
-            <div class="image-box"><img src="https://images.unsplash.com/photo-1542121083-f64d44ad2658?q=80&w=600&h=600&fit=crop"></div>
-            <div class="text-box"><p>"Adam, ormanda dans eden o Prensesi anlatmış. O an, dünyadaki tüm gürültülerin yerini huzur almıştı."</p></div>
-        </section>
+  <div class="q-counter" id="qCounter">1 / 6</div>
 
-        <section class="story-page">
-            <div class="image-box"><img src="https://images.unsplash.com/photo-1505628346881-b72b27e84530?q=80&w=600&h=600&fit=crop"></div>
-            <div class="text-box"><p>"Karakedi ona bir yol göstermişti ama bir bedeli vardı: Kızı görebilecekti ancak tek kelime dahi edemeyecekti."</p></div>
-        </section>
+  <div class="controls">
+    <button class="btn-round" onclick="swipe('left')"  title="Hayır">⛔</button>
+    <button class="btn-round" onclick="swipe('right')" title="Evet">❤️</button>
+  </div>
+</div>
 
-        <section class="story-page">
-            <div class="image-box"><img src="https://images.unsplash.com/photo-1516414929306-264d87b2820d?q=80&w=600&h=600&fit=crop"></div>
-            <div class="text-box"><p>"Yabancı, sessizliğini mektuplarla bozmak istedi. Fakat her satır, aralarındaki uçurumu biraz daha derinleştirdi."</p></div>
-        </section>
+<!-- EKRAN 3A: HEPSİNİ SOLA ATTI → SANIRИМ ERKEKSINIZ -->
+<div id="s-result2" class="screen">
+  <p class="result-label">Test Sonucu</p>
+  <h2 class="result-heading">Sanırım<br><em>Erkeksiniz</em></h2>
+  <div class="profile-ring">
+    <img src="eda2.jpeg" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+    <div class="profile-initials" style="display:none;">♂</div>
+  </div>
+  <p class="result-desc">Burayı bulabileceğinden pek emin değildim ama bulduysan umarım seni gülümsetebilmiştir. Sadece küçük bir şaka 😓</p>
+  <button class="btn" onclick="restart()" style="margin-top:6px">Tekrar Dene</button>
+</div>
 
-        <section class="story-page">
-            <div class="image-box"><img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=600&h=600&fit=crop"></div>
-            <div class="text-box">
-                <p>"Ve sonunda sürgün edildi. O an anladı; aslında hiçbir zaman onun olmamış bir şeyi kaybetmişti."</p>
-                <p style="margin-top: 15px; font-size: 0.8rem; color: #888;">(Aşağı kaydırmaya devam et...)</p>
-            </div>
-        </section>
+<!-- EKRAN 3B: EN GÜZEL ŞEBNEM FERAH FANI -->
+<div id="s-result" class="screen">
+  <p class="result-label">Test Sonucu</p>
+  <h2 class="result-heading">En Güzel<br><em>Şebnem Ferah Fanı</em></h2>
+  <div class="profile-ring">
+    <img src="eda.jpeg" id="final-img" onerror="this.style.display='none'; document.getElementById('fallback-init').style.display='flex'">
+    <div class="profile-initials" id="fallback-init" style="display:none;">E</div>
+  </div>
+  <p class="result-desc">Şarkılardan bile güzel...</p>
+  <button class="btn" onclick="restart()" style="margin-top:6px">Tekrar Dene</button>
+</div>
 
-        <section class="final-page">
-            <div class="wall-text">Özür dilerim prenses</div>
-            <div class="notes-container">
-                <div class="sheet" id="bgSheet" style="z-index: 1;">
-                    <div class="pin"></div>
-                    <p class="sheet-text" id="nextText">...</p>
-                </div>
-                <div class="sheet" id="activeSheet" style="z-index: 2; cursor: pointer;">
-                    <div class="pin"></div>
-                    <p class="sheet-text" id="activeText">Tıkla ve kopar...</p>
-                </div>
-            </div>
-        </section>
+<script>
+  const data = [
+    { t: "Sil Baştan",    s: "s1.mp3", i: "1.jfif" },
+    { t: "Can Kırıkları", s: "s2.mp3", i: "2.jpg"  },
+    { t: "Hoşçakal",      s: "s3.mp3", i: "3.jpg"  },
+    { t: "Mayın Tarlası", s: "s4.mp3", i: "4.jpg"  },
+    { t: "Sigara",        s: "s5.mp3", i: "5.jpg"  },
+    { t: "Utangaç",       s: "s6.mp3", i: "6.png"  }
+  ];
 
-    </div>
+  let idx = 0;
+  let answers = [];
+  let canSwipe = true;
+  let audio = new Audio();
 
-    <script>
-        const passwordInput = document.getElementById('password-input');
-        const overlay = document.getElementById('entry-overlay');
-        const mainContainer = document.getElementById('main-container');
-        const progressBar = document.getElementById('progress-bar');
-        const pages = document.querySelectorAll('.story-page, .final-page');
+  /* ─── DRAG STATE ─── */
+  let dragging = false;
+  let startX = 0;
+  let diffX = 0;
+  let activeCardEl = null;
 
-        const noteContents = [
-            "Bu hikaye aslında çok daha derindi.",
-            "Kelimeleri bazen kağıda dökmek, yüzüne söylemekten daha zordu.",
-            "Sessizliğim, anlatacak bir şeyim olmadığından değil...",
-            "Sadece en doğru cümleyi bulamadığımdandı.",
-            "Bazen sadece sessizce veda etmek gerekir.",
-            "Son bir hatıra olarak kalsın bu sayfa."
-        ];
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    el.classList.add('active');
+    // re-trigger animation
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  }
 
-        let noteIndex = 0;
+  function start() {
+    show('s-quiz');
+    renderCards();
+    playTrack(0);
+  }
 
-        function checkPassword() {
-            if (passwordInput.value === 'veda') {
-                overlay.style.opacity = '0';
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    mainContainer.style.display = 'block';
-                    progressBar.style.display = 'block';
-                    document.body.style.overflow = 'auto';
-                    
-                    // Notların ilk metinlerini set et
-                    document.getElementById('activeText').innerText = noteContents[0];
-                    document.getElementById('nextText').innerText = noteContents[1];
-                }, 1000);
-            } else {
-                document.getElementById('error-msg').innerText = "Hatalı şifre.";
-            }
-        }
+  function renderCards() {
+    const cont = document.getElementById('card-container');
+    cont.innerHTML = '';
 
-        // Kopan Kağıt Mantığı
-        const activeSheet = document.getElementById('activeSheet');
-        activeSheet.addEventListener('click', () => {
-            if (noteIndex >= noteContents.length - 1) return;
+    // render from back to front
+    for (let i = Math.min(idx + 2, data.length - 1); i >= idx; i--) {
+      const d = data[i];
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'c-' + i;
 
-            activeSheet.classList.add('torn-off');
-            setTimeout(() => {
-                noteIndex++;
-                if (noteIndex < noteContents.length - 1) {
-                    document.getElementById('activeText').innerText = noteContents[noteIndex];
-                    document.getElementById('nextText').innerText = noteContents[noteIndex + 1];
-                    activeSheet.style.transition = 'none';
-                    activeSheet.classList.remove('torn-off');
-                    setTimeout(() => {
-                        activeSheet.style.transition = 'transform 0.8s cubic-bezier(0.5, 0, 0.7, 1), opacity 0.5s';
-                    }, 50);
-                } else {
-                    activeSheet.style.display = 'none';
-                    document.getElementById('bgSheet').style.display = 'none';
-                }
-            }, 750);
-        });
+      if      (i === idx + 2) card.classList.add('back2');
+      else if (i === idx + 1) card.classList.add('back1');
+      else                    card.classList.add('active');
 
-        // Kaydırma Takibi
-        mainContainer.addEventListener('scroll', () => {
-            const scrollTop = mainContainer.scrollTop;
-            const height = mainContainer.scrollHeight - mainContainer.clientHeight;
-            progressBar.style.width = (scrollTop / height) * 100 + "%";
+      card.innerHTML = `
+        <img class="card-img" src="${d.i}" onerror="this.src='https://via.placeholder.com/340x460/2d2d44/ff85a1?text=${encodeURIComponent(d.t)}'">
+        <div class="card-overlay"></div>
+        <div class="stamp stamp-yes">Evet ♥</div>
+        <div class="stamp stamp-no">Hayır ✕</div>
+        <div class="card-content">
+          <div class="card-title">${d.t}</div>
+          <div class="card-hint">← sola: Hayır &nbsp;|&nbsp; sağa: Evet →</div>
+        </div>
+      `;
 
-            pages.forEach(page => {
-                const rect = page.getBoundingClientRect();
-                if (rect.top >= -window.innerHeight / 2 && rect.top <= window.innerHeight / 2) {
-                    page.classList.add('active');
-                } else {
-                    page.classList.remove('active');
-                }
-            });
-        });
+      cont.appendChild(card);
+    }
 
-        // Enter tuşu desteği
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPassword();
-        });
-    </script>
+    updateProgress();
+    attachDrag();
+  }
+
+  function attachDrag() {
+    const card = document.querySelector('.card.active');
+    if (!card) return;
+    activeCardEl = card;
+
+    const sY = card.querySelector('.stamp-yes');
+    const sN = card.querySelector('.stamp-no');
+
+    const onStart = (e) => {
+      if (!canSwipe) return;
+      dragging = true;
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      card.style.transition = 'none';
+    };
+
+    const onMove = (e) => {
+      if (!dragging) return;
+      diffX = (e.touches ? e.touches[0].clientX : e.clientX) - startX;
+      const rot = diffX * 0.07;
+      card.style.transform = `translateX(${diffX}px) rotate(${rot}deg)`;
+      const ratio = Math.min(Math.abs(diffX) / 80, 1);
+      if (diffX > 0) { sY.style.opacity = ratio; sN.style.opacity = 0; }
+      else           { sN.style.opacity = ratio; sY.style.opacity = 0; }
+    };
+
+    const onEnd = () => {
+      if (!dragging) return;
+      dragging = false;
+      if (Math.abs(diffX) > 90) {
+        swipe(diffX > 0 ? 'right' : 'left');
+      } else {
+        card.style.transition = 'transform 0.35s ease';
+        card.style.transform  = '';
+        sY.style.opacity = 0;
+        sN.style.opacity = 0;
+      }
+      diffX = 0;
+    };
+
+    card.addEventListener('mousedown',  onStart);
+    card.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('mousemove',  onMove);
+    document.addEventListener('touchmove',  onMove, { passive: true });
+    document.addEventListener('mouseup',    onEnd);
+    document.addEventListener('touchend',   onEnd);
+  }
+
+  function swipe(dir) {
+    if (!canSwipe) return;
+    canSwipe = false;
+    answers.push(dir);
+
+    const card = document.getElementById('c-' + idx);
+    if (!card) return;
+
+    card.classList.remove('active');
+    card.classList.add(dir === 'left' ? 'fly-left' : 'fly-right');
+
+    idx++;
+
+    setTimeout(() => {
+      if (idx >= data.length) {
+        showResult();
+      } else {
+        playTrack(idx);
+        renderCards();
+        canSwipe = true;
+      }
+    }, 430);
+  }
+
+  function updateProgress() {
+    const pct = (idx / data.length) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('qCounter').textContent = `${idx + 1} / ${data.length}`;
+  }
+
+  function playTrack(n) {
+    audio.pause();
+    audio.src = n < data.length ? data[n].s : "seda.mp3";
+    audio.play().catch(() => {});
+  }
+
+  function showResult() {
+    audio.pause();
+    playTrack(99);
+
+    const allLeft = answers.every(a => a === 'left');
+
+    if (allLeft) {
+      show('s-result2');
+    } else {
+      show('s-result');
+      launchConfetti();
+    }
+  }
+
+  function launchConfetti() {
+    const cols = ['#ff85a1','#9d81ba','#ffd6e7','#fff','#c9b8e8'];
+    for (let i = 0; i < 70; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.className = 'cf';
+        c.style.cssText = `
+          left:${Math.random()*100}vw;
+          background:${cols[Math.floor(Math.random()*cols.length)]};
+          width:${5+Math.random()*8}px;
+          height:${5+Math.random()*8}px;
+          border-radius:${Math.random()>.5?'50%':'2px'};
+          animation-duration:${1.4+Math.random()*2}s;
+          animation-delay:${Math.random()*0.6}s;
+        `;
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3500);
+      }, i * 28);
+    }
+  }
+
+  function restart() {
+    idx = 0;
+    answers = [];
+    canSwipe = true;
+    audio.pause();
+    show('s-start');
+  }
+</script>
 </body>
 </html>
